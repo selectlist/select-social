@@ -23,6 +23,8 @@ const Login = async (req, res) => {
 			res,
 			maxAge: 60 * 60 * 24,
 		});
+
+        res.redirect("/");
 	}
 };
 
