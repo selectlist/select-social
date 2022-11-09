@@ -1,30 +1,32 @@
 import { setCookie } from "cookies-next";
 
 const Login = async (req, res) => {
-	const data = req.query.data;
+	const data = req.query.token;
 
 	if (!data || !data === "") {
 		const auth = await fetch(
-			"https://api.select-list.xyz/auth/discord/login",
-			{
-				headers: {
-					domain: "select-list.xyz",
-					redirect: "https://social.select-list.xyz/api/auth/login",
-					Authorization: "Bearer L0-KKRTYEPR",
-				},
-			}
-		).then((res) => res.json());
+			"https://api.select-list.xyz/auth/login"
+		).catch((err) => {
+			res.status(500).send(err);
+		});
 
-		if (auth.verification_passed) res.redirect(auth.url);
-		else res.send("Security Verification Checks have failed.");
+		if (auth.status === 200) {
+			const json = await auth.json();
+
+			if (json.error) res.status(500).send(err);
+			else res.redirect(json.url);
+		} else
+			res.status(500).send(
+				"It seems that our servers are having issues at this time!"
+			);
 	} else {
-		setCookie("auth", data, {
+		setCookie("token", data, {
 			req,
 			res,
 			maxAge: 60 * 60 * 24,
 		});
 
-        res.redirect("/");
+		res.redirect("/");
 	}
 };
 
