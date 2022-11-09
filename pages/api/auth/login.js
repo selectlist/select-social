@@ -5,7 +5,10 @@ const Login = async (req, res) => {
 
 	if (!data || !data === "") {
 		const auth = await fetch(
-			"https://api.select-list.xyz/auth/login"
+			"https://api.select-list.xyz/auth/login",
+                        headers: {
+                           origin: "https://social.select-list.xyz"
+                        }
 		).catch((err) => {
 			res.status(500).send(err);
 		});
