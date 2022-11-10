@@ -2,9 +2,8 @@ import Head from "next/head";
 import { Fragment } from "react";
 import { Disclosure, Menu, Transition } from "@headlessui/react";
 import { Bars3Icon, BellIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { getCookie, hasCookie } from "cookies-next";
 import "../styles/globals.css";
-
-const user = null;
 
 // Menu Items
 const navigation = [
@@ -34,6 +33,23 @@ const userNavigation = [
 		href: "/api/auth/logout",
 	},
 ];
+
+// Login with Discord
+const loginDiscord = async () => {
+    const auth = await fetch(
+        "https://api.select-list.xyz/auth/login"
+    ).catch((err) => {
+        res.status(500).send(err);
+    });
+
+    if (auth.status === 200) {
+        const json = await auth.json();
+
+        if (json.error) throw new Error(json.error);
+        else window.location.href = json.url;
+    } else
+        throw new Error("It seems that our servers are having issues at this time!");
+};
 
 // Class Names
 const classNames = (...classes) => {
@@ -121,7 +137,7 @@ const SelectSocial = ({ Component, pageProps }) => {
 									</div>
 								</div>
 
-								{user && (
+								{this.pageProps.user ? (
 									<div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
 										<button
 											type="button"
@@ -199,7 +215,17 @@ const SelectSocial = ({ Component, pageProps }) => {
 											</Transition>
 										</Menu>
 									</div>
-								)}
+								) : (
+                                    <div id="login">
+                                        <button
+                                            type="button"
+                                            onClick={loginDiscord}
+                                            class="bg-gray-800 p-1 text-gray-400 hover:text-white focus:outline-none"
+                                        >
+                                            Login
+                                        </button>
+                                    </div>
+                                )}
 							</div>
 						</div>
 						<Disclosure.Panel className="sm:hidden">
@@ -237,6 +263,36 @@ const SelectSocial = ({ Component, pageProps }) => {
 			</div>
 		</>
 	);
+};
+
+export const getServerSideProps = ({ req, res }) => {
+	const auth = hasCookie("token", { req, res });
+
+	if (auth) {
+		const token = getCookie("token", { req, res });
+		let user = null;
+
+        fetch(`https://api.antiraid.xyz/api/users/getwithtoken?token=${token}`)
+			.then((res) => res.json())
+			.then((i) => {
+				if (i.error) throw new Error(i.error);
+				else user = i;
+			})
+			.catch((err) => {
+				throw new Error(err);
+			});
+
+		return {
+			props: {
+				user: user,
+			},
+		};
+	}
+	return {
+		props: {
+			user: null,
+		},
+	};
 };
 
 export default SelectSocial;
