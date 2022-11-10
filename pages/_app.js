@@ -39,7 +39,7 @@ const loginDiscord = async () => {
     const auth = await fetch(
         "https://api.select-list.xyz/auth/login"
     ).catch((err) => {
-        res.status(500).send(err);
+        throw new Error(err);
     });
 
     if (auth.status === 200) {
@@ -220,7 +220,7 @@ const SelectSocial = ({ Component, pageProps }) => {
                                         <button
                                             type="button"
                                             onClick={loginDiscord}
-                                            class="bg-gray-800 p-1 text-gray-400 hover:text-white focus:outline-none"
+                                            className="bg-gray-800 p-1 text-gray-400 hover:text-white focus:outline-none"
                                         >
                                             Login
                                         </button>
